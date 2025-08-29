@@ -9,6 +9,7 @@
     h1 { color: #007aff; }
     .schedule { margin-top: 20px; }
     .period { padding: 10px; border-bottom: 1px solid #ccc; }
+    .current { background-color: #d1eaff; font-weight: bold; }
     button {
       margin-top: 10px;
       padding: 10px 20px;
@@ -23,12 +24,19 @@
       padding: 5px;
       font-size: 16px;
     }
+    #countdown {
+      margin-top: 15px;
+      font-size: 18px;
+      color: #007aff;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h1>School Schedule</h1>
   <p id="today"></p>
   <div class="schedule" id="schedule"></div>
+  <div id="countdown"></div>
 
   <h3>Check Another Date:</h3>
   <input type="date" id="datePicker" />
@@ -46,52 +54,119 @@
 
     // 🔹 Period times
     const periodTimes = [
-      "7:55 AM - 8:59 AM",
-      "9:03 AM - 9:58 AM",
-      "10:02 AM - 10:57 AM",
-      "10:59 AM - 11:54 AM",
-      "11:56 AM - 12:51 PM",
-      "12:55 PM - 1:50 PM",
-      "1:54 PM - 2:49 PM"
+      ["7:55", "8:59"],
+      ["9:03", "9:58"],
+      ["10:02", "10:57"],
+      ["10:59", "11:54"],
+      ["11:56", "12:51"],
+      ["12:55", "1:50"],
+      ["1:54", "2:49"]
     ];
 
-    // 🔹 Rotation: A → B → C → D → A ... (weekdays only)
+    // 🔹 Room numbers
+    const rooms = {
+      "History": "267",
+      "Marketing": "130",
+      "Chemistry": "188",
+      "PE": "Gym",
+      "English": "147",
+      "Orchestra": "121",
+      "Algebra 2": "153",
+      "Spanish": "255",
+      "Lunch": ""
+    };
+
+    // 🔹 Rotation: A → B → C → D ... (weekdays only)
     const dayTypes = ["A", "B", "C", "D"];
-    const startDate = new Date("2025-09-04"); // First day of school is an A day
+    const startDate = new Date("2025-09-04");
 
     function isWeekend(date) {
       const day = date.getDay();
-      return day === 0 || day === 6; // Sunday or Saturday
+      return day === 0 || day === 6;
     }
 
     function getDayType(date) {
       let d = new Date(startDate);
-      let index = 0; // Start at "A"
+      let index = 0;
       while (d < date) {
         d.setDate(d.getDate() + 1);
-        if (!isWeekend(d)) {
-          index = (index + 1) % dayTypes.length;
-        }
+        if (!isWeekend(d)) index = (index + 1) % dayTypes.length;
       }
       return dayTypes[index];
+    }
+
+    function parseTime(timeStr) {
+      let [hour, minute] = timeStr.split(":").map(Number);
+      return { hour, minute };
     }
 
     function showSchedule(date, elementId) {
       const dayType = getDayType(date);
       const scheduleList = schedules[dayType];
       let html = `<h2>${dayType} Day</h2>`;
+      let now = new Date();
+      let currentPeriodIndex = -1;
+      let nextPeriodTime = null;
+
       scheduleList.forEach((subject, i) => {
-        html += `<div class="period"><b>Period ${i+1} (${periodTimes[i]}):</b> ${subject}</div>`;
+        const room = rooms[subject] ? `Room ${rooms[subject]}` : "";
+        const [startStr, endStr] = periodTimes[i];
+        let start = parseTime(startStr);
+        let end = parseTime(endStr);
+        let startDateTime = new Date(date);
+        startDateTime.setHours(start.hour, start.minute, 0);
+        let endDateTime = new Date(date);
+        endDateTime.setHours(end.hour, end.minute, 0);
+
+        // Check if current period
+        let isCurrent = now >= startDateTime && now <= endDateTime;
+        if (isCurrent) currentPeriodIndex = i;
+        // Find next period
+        if (now < startDateTime && !nextPeriodTime) nextPeriodTime = startDateTime;
+
+        html += `<div class="period ${isCurrent ? 'current' : ''}"><b>Period ${i+1} (${periodTimes[i][0]} - ${periodTimes[i][1]}):</b> ${subject} ${room}</div>`;
       });
+
       document.getElementById(elementId).innerHTML = html;
+
+      // Countdown to next period
+      const countdownEl = document.getElementById("countdown");
+      if (currentPeriodIndex >= 0) {
+        let endStr = periodTimes[currentPeriodIndex][1];
+        let end = parseTime(endStr);
+        let endTime = new Date(date);
+        endTime.setHours(end.hour, end.minute, 0);
+        updateCountdown(endTime);
+      } else if (nextPeriodTime) {
+        updateCountdown(nextPeriodTime);
+      } else {
+        countdownEl.innerText = "No more classes today!";
+      }
+
       return dayType;
+    }
+
+    function updateCountdown(targetTime) {
+      function tick() {
+        const now = new Date();
+        const diff = targetTime - now;
+        if (diff <= 0) {
+          document.getElementById("countdown").innerText = "Class change!";
+          return;
+        }
+        let minutes = Math.floor((diff / 1000 / 60) % 60);
+        let hours = Math.floor(diff / 1000 / 60 / 60);
+        document.getElementById("countdown").innerText = `Time until next class: ${hours}h ${minutes}m`;
+        setTimeout(tick, 1000);
+      }
+      tick();
     }
 
     // Show today's schedule
     const today = new Date();
-    const todayType = showSchedule(today, "schedule");
+    showSchedule(today, "schedule");
     document.getElementById("today").innerText =
-      `Today is ${today.toDateString()} — ${todayType} Day`;
+      `Today is ${today.toDateString()} — ${getDayType(today)} Day`;
 
     // Check another date
     function checkDate() {
