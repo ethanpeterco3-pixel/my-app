@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My School Schedule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+    body { font-family: sans-serif; text-align: center; margin: 20px; }
+    h1 { color: #007aff; }
+    .schedule { margin-top: 20px; }
+    .period { padding: 10px; border-bottom: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>School Schedule</h1>
+  <p id="today"></p>
+  <div class="schedule" id="schedule"></div>
+
+  <h3>Check Another Date:</h3>
+  <input type="date" id="datePicker" />
+  <button onclick="checkDate()">Check</button>
+  <p id="otherDay"></p>
+
+  <script>
+    // 🔹 Customize this with your real schedule:
+    const schedules = {
+      "A": ["History", "Marketing", "Chemistry", "Lunch", "English", "Orchestra", "Algebra 2"],
+      "B": ["PE", "History", "Marketing", "Lunch", "Spanish", "English", "Orchestra"],
+      "C": ["Chemistry", "PE", "History", "Lunch", "Algebra 2", "Spanish", "English"],
+      "D": ["Marketing", "Chemistry", "PE", "Lunch", "Orchestra", "Algebra 2", "Spanish"]
+    };
+
+    // 🔹 Rotation logic: A → B → C → D → A ...
+    const dayTypes = ["A", "B", "C", "D"];
+    const startDate = new Date("2025-09-04"); // First day of school
+
+    function getDayType(date) {
+      const daysPassed = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
+      const index = (daysPassed % 4 + 4) % 4; // keep it positive
+      return dayTypes[index];
+    }
+
+    function showSchedule(date, elementId) {
+      const dayType = getDayType(date);
+      const scheduleList = schedules[dayType];
+      let html = `<h2>${dayType} Day</h2>`;
+      scheduleList.forEach((subject, i) => {
+        html += `<div class="period"><b>Period ${i+1}:</b> ${subject}</div>`;
+      });
+      document.getElementById(elementId).innerHTML = html;
+      return dayType;
+    }
+
+    // Show today's schedule
+    const today = new Date();
+    const todayType = showSchedule(today, "schedule");
+    document.getElementById("today").innerText =
+      `Today is ${today.toDateString()} — ${todayType} Day`;
+
+    // Check another date
+    function checkDate() {
+      const input = document.getElementById("datePicker").value;
+      if (!input) return;
+      const chosenDate = new Date(input);
+      const type = getDayType(chosenDate);
+      document.getElementById("otherDay").innerText =
+        `${chosenDate.toDateString()} is a ${type} Day`;
+    }
+  </script>
+</body>
+</html>
