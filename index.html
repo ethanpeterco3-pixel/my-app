@@ -5,10 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <style>
-    body { font-family: sans-serif; text-align: center; margin: 20px; }
+    body { font-family: sans-serif; text-align: center; margin: 20px; background: #f9f9f9; }
     h1 { color: #007aff; }
     .schedule { margin-top: 20px; }
     .period { padding: 10px; border-bottom: 1px solid #ccc; }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #007aff;
+      color: white;
+    }
+    input[type="date"] {
+      margin-top: 10px;
+      padding: 5px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -22,7 +36,7 @@
   <p id="otherDay"></p>
 
   <script>
-    // 🔹 Customize this with your real schedule:
+    // 🔹 Your real schedule
     const schedules = {
       "A": ["History", "Marketing", "Chemistry", "Lunch", "English", "Orchestra", "Algebra 2"],
       "B": ["PE", "History", "Marketing", "Lunch", "Spanish", "English", "Orchestra"],
@@ -30,9 +44,9 @@
       "D": ["Marketing", "Chemistry", "PE", "Lunch", "Orchestra", "Algebra 2", "Spanish"]
     };
 
-    // 🔹 Rotation logic: A → B → C → D → A ...
+    // 🔹 Rotation: A → B → C → D → A ...
     const dayTypes = ["A", "B", "C", "D"];
-    const startDate = new Date("2025-09-04"); // First day of school
+    const startDate = new Date("2025-09-04"); // First day of school is an A day
 
     function getDayType(date) {
       const daysPassed = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
@@ -69,3 +83,4 @@
   </script>
 </body>
 </html>
+
