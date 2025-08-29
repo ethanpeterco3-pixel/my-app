@@ -44,13 +44,28 @@
       "D": ["Marketing", "Chemistry", "PE", "Lunch", "Orchestra", "Algebra 2", "Spanish"]
     };
 
-    // 🔹 Rotation: A → B → C → D → A ...
+    // 🔹 Rotation: A → B → C → D → A ... (weekdays only)
     const dayTypes = ["A", "B", "C", "D"];
     const startDate = new Date("2025-09-04"); // First day of school is an A day
 
+    // Helper: check if a date is a weekend
+    function isWeekend(date) {
+      const day = date.getDay(); // 0 = Sunday, 6 = Saturday
+      return day === 0 || day === 6;
+    }
+
+    // Get the day type by counting only weekdays
     function getDayType(date) {
-      const daysPassed = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
-      const index = (daysPassed % 4 + 4) % 4; // keep it positive
+      let d = new Date(startDate);
+      let index = 0; // Start at "A"
+      
+      while (d < date) {
+        d.setDate(d.getDate() + 1); // go to next day
+        if (!isWeekend(d)) { // only count weekdays
+          index = (index + 1) % dayTypes.length;
+        }
+      }
+
       return dayTypes[index];
     }
 
@@ -83,4 +98,3 @@
   </script>
 </body>
 </html>
-
