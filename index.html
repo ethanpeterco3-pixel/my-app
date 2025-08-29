@@ -44,28 +44,35 @@
       "D": ["Marketing", "Chemistry", "PE", "Lunch", "Orchestra", "Algebra 2", "Spanish"]
     };
 
+    // 🔹 Period times
+    const periodTimes = [
+      "7:55 AM - 8:59 AM",
+      "9:03 AM - 9:58 AM",
+      "10:02 AM - 10:57 AM",
+      "10:59 AM - 11:54 AM",
+      "11:56 AM - 12:51 PM",
+      "12:55 PM - 1:50 PM",
+      "1:54 PM - 2:49 PM"
+    ];
+
     // 🔹 Rotation: A → B → C → D → A ... (weekdays only)
     const dayTypes = ["A", "B", "C", "D"];
     const startDate = new Date("2025-09-04"); // First day of school is an A day
 
-    // Helper: check if a date is a weekend
     function isWeekend(date) {
-      const day = date.getDay(); // 0 = Sunday, 6 = Saturday
-      return day === 0 || day === 6;
+      const day = date.getDay();
+      return day === 0 || day === 6; // Sunday or Saturday
     }
 
-    // Get the day type by counting only weekdays
     function getDayType(date) {
       let d = new Date(startDate);
       let index = 0; // Start at "A"
-      
       while (d < date) {
-        d.setDate(d.getDate() + 1); // go to next day
-        if (!isWeekend(d)) { // only count weekdays
+        d.setDate(d.getDate() + 1);
+        if (!isWeekend(d)) {
           index = (index + 1) % dayTypes.length;
         }
       }
-
       return dayTypes[index];
     }
 
@@ -74,7 +81,7 @@
       const scheduleList = schedules[dayType];
       let html = `<h2>${dayType} Day</h2>`;
       scheduleList.forEach((subject, i) => {
-        html += `<div class="period"><b>Period ${i+1}:</b> ${subject}</div>`;
+        html += `<div class="period"><b>Period ${i+1} (${periodTimes[i]}):</b> ${subject}</div>`;
       });
       document.getElementById(elementId).innerHTML = html;
       return dayType;
